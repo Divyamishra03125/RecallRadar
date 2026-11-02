@@ -1,0 +1,1 @@
+export default function Footer() { return <footer className="footer"><span>© {new Date().getFullYear()} RecallRadar</span><span>Product safety intelligence</span></footer>; }
