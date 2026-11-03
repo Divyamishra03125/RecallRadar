@@ -16,6 +16,7 @@
    - [Option A: Linux Systemd Service](#option-a-linux-systemd-service)
    - [Option B: Production Docker Containerization](#option-b-production-docker-containerization)
    - [Option C: Docker Compose (Full Stack)](#option-c-docker-compose-full-stack)
+   - [Option D: Render Cloud Deployment (Docker & Managed PostgreSQL)](#option-d-render-cloud-deployment-docker--managed-postgresql)
 7. [Frontend Deployment Options](#7-frontend-deployment-options)
    - [Nginx Production Reverse Proxy & Static Host](#nginx-production-reverse-proxy--static-host)
    - [Cloud Hosting (Vercel / Netlify / AWS S3 + CloudFront)](#cloud-hosting-vercel--netlify--aws-s3--cloudfront)
@@ -420,6 +421,51 @@ Launch full stack:
 ```bash
 docker compose up -d
 ```
+
+---
+
+### Option D: Render Cloud Deployment (Docker & Managed PostgreSQL)
+
+Render natively runs containerized apps using Docker and provides managed PostgreSQL databases with automatic SSL termination.
+
+#### Method 1: 1-Click Render Blueprint (Recommended)
+The repository contains `render.yaml` which automatically sets up both the PostgreSQL database and the Backend Web Service.
+
+1. Navigate to [dashboard.render.com](https://dashboard.render.com/).
+2. Click **New +** -> **Blueprint**.
+3. Connect your repository: `https://github.com/Divyamishra03125/RecallRadar`.
+4. Render detects `render.yaml` and prepares:
+   - **`recallradar-db`**: Free PostgreSQL database.
+   - **`recallradar-backend`**: Docker Web Service running the Spring Boot backend.
+5. Provide your `RECALLRADAR_GEMINI_API_KEY` when prompted.
+6. Click **Apply**. Both the database and backend will build and deploy automatically.
+
+#### Method 2: Manual Dashboard Setup
+
+1. **Create Managed PostgreSQL Database**:
+   - On Render Dashboard, click **New +** -> **PostgreSQL**.
+   - Name: `recallradar-db`
+   - Database: `recallradar`
+   - User: `postgres`
+   - Plan: **Free**
+   - Click **Create Database**.
+   - Copy the **Internal Database URL** (e.g., `postgres://postgres:password@dpg-...:5432/recallradar`).
+
+2. **Create Backend Web Service**:
+   - Click **New +** -> **Web Service**.
+   - Select your repository `https://github.com/Divyamishra03125/RecallRadar`.
+   - **Language**: `Docker`
+   - **Branch**: `main`
+   - **Root Directory**: Leave blank or set `recallradar-backend` (both work).
+   - **Plan**: **Free**
+   - Under **Environment Variables**, add:
+     - `DATABASE_URL`: *(paste Render Internal Database URL)*
+     - `PORT`: `8080`
+     - `RECALLRADAR_GEMINI_API_KEY`: *(your Google Gemini API key)*
+     - `JWT_SECRET`: *(generate random 64-char string)*
+     - `CORS_ALLOWED_ORIGINS`: `https://*.vercel.app,http://localhost:5173`
+   - Under **Health Check Path**, enter: `/actuator/health`
+   - Click **Create Web Service**.
 
 ---
 
